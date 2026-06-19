@@ -12,12 +12,20 @@ class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
 
 
-def model_call(state:AgentState) ->AgentState:
- system_prompt= SystemMessage(content=
-                              "You are my AI assistant, please answer my query to the best of your ability"
- )
- response=model_with_tools.invoke([system_prompt] +state["messages"])
- return {"messages": [response]}
+def model_call(state: AgentState) -> AgentState:
+    system_prompt = SystemMessage(
+        content=(
+            "You are my AI Secretary Assistant. Your main responsibility is to retrieve the official documents, "
+            "email layouts, and application templates that the user needs.\n\n"
+            "RULES:\n"
+            "1. Do NOT make up your own templates from your internal knowledge.\n"
+            "2. You MUST USE the 'fetch_office_template' tool to retrieve the exact template that the user asks for.\n"
+            "3. Fill in any brackets like [Your Name] if the user provides that information in their query.\n"
+            "4. For general knowledge or current events, use the internet search tool."
+        )
+    )
+    response = model_with_tools.invoke([system_prompt] + state["messages"])
+    return {"messages": [response]}
 
 #Underlying action behind the conditional edge
 def should_continue(state: AgentState):
